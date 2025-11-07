@@ -1,6 +1,11 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
+
+import BookEvent from "@/components/BookEvent";
 import { BASE_URL } from "@/lib/constants";
+import { IEvent } from "@/database";
+import { getSimilarEventsBySlug } from "@/lib/actions/event.actions";
+import EventCard from "@/components/EventCard";
 
 // TODO: extract helper components
 // TODO: rework EventDetailItem component
@@ -93,6 +98,10 @@ const EventDetailsPage = async ({
     organizer,
   } = event;
 
+  const bookings = 10;
+
+  const similarEvents: IEvent[] = await getSimilarEventsBySlug(slug);
+
   return (
     <section id="event">
       <div className="header">
@@ -135,21 +144,42 @@ const EventDetailsPage = async ({
             />
           </section>
 
-          <EventAgenda agendaItems={JSON.parse(agenda[0])} />
+          <EventAgenda agendaItems={agenda} />
 
           <section className="flex-col-gap-2">
             <h2>About the Organizer</h2>
             {organizer}
           </section>
 
-          <EventTags tags={JSON.parse(tags[0])} />
+          <EventTags tags={tags} />
         </div>
 
         {/* Right Side - Booking Form */}
         <aside className="booking">
-          <p className="text-lg font-semibold">Book Event</p>
+          <div className="signup-card">
+            <h2>Book Your Spot</h2>
+
+            <p className="text-sm">
+              {bookings > 0
+                ? `Join ${bookings} people that already booked their spot!`
+                : `Be the first to book your spot!`}
+            </p>
+
+            <BookEvent />
+          </div>
         </aside>
       </div>
+
+      {similarEvents.length > 0 && (
+        <div className="flex w-full flex-col gap-4 pt-20">
+          <h2>Similar Events</h2>
+          <div className="events">
+            {similarEvents.map((event: IEvent) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
+        </div>
+      )}
     </section>
   );
 };

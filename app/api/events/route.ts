@@ -19,7 +19,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const createdEvent = await Event.create(event);
+    let tags = JSON.parse(formData.get("tags") as string);
+    let agenda = JSON.parse(formData.get("agenda") as string);
+
+    const createdEvent = await Event.create({ ...event, tags, agenda });
 
     return NextResponse.json(
       { message: "Event created successfully", event: createdEvent },
